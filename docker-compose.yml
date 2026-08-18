@@ -1,0 +1,11 @@
+name: task-app-ui-spring
+services:
+  ui:
+    image: ghcr.io/devtiro/devtiro-build-task-app:latest
+    ports:
+      - "3000:3000"
+    environment:
+      - BACKEND_HOST=host.docker.internal
+      - BACKEND_PORTAL=8080
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
