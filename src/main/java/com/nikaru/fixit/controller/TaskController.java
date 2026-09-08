@@ -9,6 +9,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -23,6 +24,7 @@ import com.nikaru.fixit.domain.entity.User;
 import com.nikaru.fixit.service.TaskService;
 import com.nikaru.fixit.service.UserService;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -50,6 +52,12 @@ public class TaskController {
         TaskResponseDto createdTaskDto = toResponse(task);
         return new ResponseEntity<>(createdTaskDto, HttpStatus.CREATED);
     }
+
+    @GetMapping("/csrf")
+    public String getCSRF(@RequestAttribute("_csrf") String token ) {
+        return token;
+    }
+    
 
     @GetMapping
     public ResponseEntity<List<TaskResponseDto>> listTasks() {
