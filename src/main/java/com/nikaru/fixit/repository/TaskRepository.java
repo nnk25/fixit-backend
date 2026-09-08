@@ -4,8 +4,8 @@ import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.nikaru.fixit.domain.entities.Task;
+import com.nikaru.fixit.domain.entity.Task;
 
 public interface TaskRepository extends JpaRepository<Task, UUID> {
-
+    
 }

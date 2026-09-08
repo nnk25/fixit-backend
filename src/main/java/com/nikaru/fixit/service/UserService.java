@@ -2,38 +2,28 @@ package com.nikaru.fixit.service;
 
 import java.util.Optional;
 
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.nikaru.fixit.domain.entities.User;
+import com.nikaru.fixit.domain.entity.User;
 import com.nikaru.fixit.repository.UserRepository;
 
 @Service
 public class UserService {
+    private final UserRepository userRepository;
 
-    private final UserRepository repo;
-    private final TokenService tokenService;
-    private BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(12);
-    private final AuthenticationManager authenticationManager;
-
-    public UserService(UserRepository repo, AuthenticationManager authenticationManager, TokenService tokenService) {
-        this.repo = repo;
-        this.authenticationManager = authenticationManager;
-        this.tokenService = tokenService;
+    public UserService(UserRepository userRepository) {
+        this.userRepository = userRepository;
     }
 
-    public User register(User userEntity) {
-        userEntity.setPassword(encoder.encode(userEntity.getPassword()));
-        return repo.save(userEntity);
+    public Optional<User> getUserByEmail(String email) {
+        return userRepository.findByEmail(email);
     }
 
-    public String login(User user) {
-        Authentication auth = authenticationManager.authenticate(
-            new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword()));
-        if(auth.isAuthenticated()) return tokenService.generateToken(user.getUsername());
-        return null;
+    public User getOrCreateUser(String email) {
+        return userRepository.findByEmail(email).orElseGet(() -> {
+            User user = new User();
+            user.setEmail(email);
+            return userRepository.save(user);
+        });
     }
 }

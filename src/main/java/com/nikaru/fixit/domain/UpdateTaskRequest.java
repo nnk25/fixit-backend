@@ -2,15 +2,17 @@ package com.nikaru.fixit.domain;
 
 import java.time.LocalDate;
 
-import com.nikaru.fixit.domain.entities.TaskPriority;
-import com.nikaru.fixit.domain.entities.TaskStatus;
+import com.nikaru.fixit.domain.entity.TaskPriority;
+import com.nikaru.fixit.domain.entity.TaskStatus;
+import com.nikaru.fixit.domain.entity.User;
 
 public record UpdateTaskRequest(
     String title,
     String description,
     LocalDate dueDate,
     TaskStatus status,
-    TaskPriority priority
+    TaskPriority priority,
+    User user
 ) {
 
 }
