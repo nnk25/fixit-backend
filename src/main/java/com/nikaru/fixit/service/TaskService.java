@@ -12,6 +12,8 @@ import com.nikaru.fixit.domain.CreateTaskRequest;
 import com.nikaru.fixit.domain.UpdateTaskRequest;
 import com.nikaru.fixit.domain.entity.Task;
 import com.nikaru.fixit.domain.entity.TaskStatus;
+import com.nikaru.fixit.domain.entity.User;
+import com.nikaru.fixit.exception.TaskAccessDeniedException;
 import com.nikaru.fixit.exception.TaskNotFoundException;
 import com.nikaru.fixit.repository.TaskRepository;
 
@@ -47,19 +49,34 @@ public class TaskService {
     public Task updateTask(UUID taskId, UpdateTaskRequest request) {
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new TaskNotFoundException(taskId));
+
+        if (task.getStatus() == TaskStatus.COMPLETE && request.status() == TaskStatus.OPEN) {
+            User completer = task.getCompleter();
+            if (completer == null || !completer.getId().equals(request.user().getId())) {
+                throw new TaskAccessDeniedException("Only the user who completed this task can reopen it");
+            }
+            task.setCompleter(null);
+        } else if (request.status() == TaskStatus.COMPLETE) {
+            task.setCompleter(request.user());
+        }
+
         task.setTitle(request.title());
         task.setDescription(request.description());
         task.setDueDate(request.dueDate());
         task.setStatus(request.status());
         task.setPriority(request.priority());
         task.setUpdatedAt(Instant.now());
-        task.setCompleter(request.user());
 
         return taskRepository.save(task);
     }
 
-    public void deleteTask(UUID taskId) {
-        taskRepository.deleteById(taskId);
+    public void deleteTask(UUID taskId, User requester) {
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new TaskNotFoundException(taskId));
+        if (!task.getOwner().getId().equals(requester.getId())) {
+            throw new TaskAccessDeniedException("Only the task owner can delete this task");
+        }
+        taskRepository.delete(task);
     }
 
 }

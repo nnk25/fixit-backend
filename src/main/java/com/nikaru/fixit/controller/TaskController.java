@@ -9,7 +9,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -19,12 +18,12 @@ import com.nikaru.fixit.domain.UpdateTaskRequest;
 import com.nikaru.fixit.domain.dto.CreateTaskRequestDto;
 import com.nikaru.fixit.domain.dto.TaskResponseDto;
 import com.nikaru.fixit.domain.dto.UpdateTaskRequestDto;
+import com.nikaru.fixit.domain.dto.UserSummaryDto;
 import com.nikaru.fixit.domain.entity.Task;
 import com.nikaru.fixit.domain.entity.User;
 import com.nikaru.fixit.service.TaskService;
 import com.nikaru.fixit.service.UserService;
 
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -53,12 +52,6 @@ public class TaskController {
         return new ResponseEntity<>(createdTaskDto, HttpStatus.CREATED);
     }
 
-    @GetMapping("/csrf")
-    public String getCSRF(@RequestAttribute("_csrf") String token ) {
-        return token;
-    }
-    
-
     @GetMapping
     public ResponseEntity<List<TaskResponseDto>> listTasks() {
         List<Task> tasks = taskService.listTasks();
@@ -80,14 +73,16 @@ public class TaskController {
     }
 
     @DeleteMapping("{taskId}")
-    public ResponseEntity<Void> deleteTask(@PathVariable UUID taskId) {
-        taskService.deleteTask(taskId);
+    public ResponseEntity<Void> deleteTask(@PathVariable UUID taskId, @AuthenticationPrincipal OAuth2User principal) {
+        String email = principal.getAttribute("email");
+        User requester = userService.getOrCreateUser(email);
+        taskService.deleteTask(taskId, requester);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     private TaskResponseDto toResponse(Task task) {
         return new TaskResponseDto(task.getId(), task.getTitle(), task.getDescription(), task.getDueDate(),
-                task.getPriority(), task.getStatus(), task.getOwner());
+                task.getPriority(), task.getStatus(), toUserSummary(task.getOwner()), toUserSummary(task.getCompleter()));
     }
 
     private CreateTaskRequest fromRequest(CreateTaskRequestDto requestDto, User owner) {
@@ -98,6 +93,13 @@ public class TaskController {
     private UpdateTaskRequest fromRequest(UpdateTaskRequestDto requestDto, User completer) {
         return new UpdateTaskRequest(requestDto.title(), requestDto.description(), requestDto.dueDate(),
                 requestDto.status(), requestDto.priority(), completer);
+    }
+
+    private UserSummaryDto toUserSummary(User user) {
+        if (user == null) {
+            return null;
+        }
+        return new UserSummaryDto(user.getId(), user.getEmail());
     }
 
 }

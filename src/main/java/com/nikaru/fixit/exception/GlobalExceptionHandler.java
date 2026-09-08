@@ -30,6 +30,11 @@ public class GlobalExceptionHandler {
     return new ResponseEntity<>(errorDto, HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler(TaskAccessDeniedException.class)
+    public ResponseEntity<ErrorDto> handleTaskAccessDeniedException(TaskAccessDeniedException ex) {
+        return new ResponseEntity<>(new ErrorDto(ex.getMessage()), HttpStatus.FORBIDDEN);
+    }
+
     // @ExceptionHandler(Exception.class)
     // public ResponseEntity<ErrorDto> handleAllExceptions(Exception ex, WebRequest request) {
     //     ErrorDto error = new ErrorDto(

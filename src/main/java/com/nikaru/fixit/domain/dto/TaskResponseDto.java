@@ -5,7 +5,6 @@ import java.util.UUID;
 
 import com.nikaru.fixit.domain.entity.TaskPriority;
 import com.nikaru.fixit.domain.entity.TaskStatus;
-import com.nikaru.fixit.domain.entity.User;
 
 public record TaskResponseDto(
     UUID id,
@@ -14,7 +13,8 @@ public record TaskResponseDto(
     LocalDate dueDate,
     TaskPriority priority,
     TaskStatus status,
-    User user
+    UserSummaryDto owner,
+    UserSummaryDto completer
 ) {
 
 }
