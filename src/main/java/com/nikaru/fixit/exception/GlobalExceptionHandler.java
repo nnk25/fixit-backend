@@ -1,4 +1,4 @@
-package com.nikaru.fixit.controller;
+package com.nikaru.fixit.exception;
 
 import java.util.UUID;
 
@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import com.nikaru.fixit.domain.dto.ErrorDto;
-import com.nikaru.fixit.exception.TaskNotFoundException;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -30,4 +29,14 @@ public class GlobalExceptionHandler {
     ErrorDto errorDto = new ErrorDto(String.format("Task with ID '%s' not found", taskUUID));
     return new ResponseEntity<>(errorDto, HttpStatus.NOT_FOUND);
     }
+
+    // @ExceptionHandler(Exception.class)
+    // public ResponseEntity<ErrorDto> handleAllExceptions(Exception ex, WebRequest request) {
+    //     ErrorDto error = new ErrorDto(
+    //             "An unexpected error occurred. Please try again later."// Generic message hidden from users
+    //     );
+        
+    //     return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
+    // }
+
 }
